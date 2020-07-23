@@ -86,10 +86,7 @@ module.exports = {
         docker: 'Docker',
         datadog: 'DataDog',
         cnrs: 'CNRS',
-        cisco: {
-            label: 'Cisco Systems',
-            ignore: /francisco/i
-        },
+        cisco: 'Cisco Systems',
         'capital one': 'Capital One',
         canonical: 'Canonical',
         'booking.com': 'Booking.com',
@@ -126,6 +123,10 @@ module.exports = {
             n !== 'virginia tech' && n !== 'myself' && n.indexOf('institute of tech') === -1 &&
             n !== 'georgia tech' && n !== 'uc davis' && n !== 'ucsd' && n !== 'uc san diego' &&
             n.indexOf('individual') === -1;
+    },
+    ignore: {
+        'Cisco Systems': /francisco/i,
+        'Amazon': /pawsey|awska|amazonas|awssat/i
     },
     catch_all: /microsoft|google|amazon|amzn|aws|red hat|redhat|ibm|pivotal|intel|facebook|alibaba|uber|wix|github|tencent|baidu|apple||mozilla|oracle|shopify|mongodb|vmware|netflix|salesforce|linkedin|palantir|yahoo|mapbox|unity|automattic|travis|spotify|zalando|esri|sap|epam|telerik|stripe|kitware|suse|odoo|yandex|adobe|airbnb|guardian|docker|nuxeo|nvidia|elastic|yelp|wso2|inria|puppet|datadog|jetbrains|canonical|rackspace|thoughtworks|andela|liferay|epfl|cnrs|embl|european bioinformatics|accenture|cisco|ericsson|capital one|huawei|booking\.com|netease|bbc|nokia|zendesk|paypal|eth z|samsung|slack|twitter|lyft|snapchat|zeit|atlassian|square|wechat|wikimedia|observable|magento|behance|aviary|fotolia/gi
 };

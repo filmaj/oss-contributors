@@ -174,16 +174,16 @@ module.exports = async function (argv) {
             if (!companies.is_empty(company)) {
                 let company_match = company.match(companies.catch_all);
                 if (company_match) {
-                    var company_info = companies.map[company_match[0].toLowerCase()];
-                    // We store additional company data to customize behaviour here, in certain cases.
-                    if (company_info.ignore) {
-                        // First, some of the company names catch A LOT of stuff via regex, so `ignore` helps to qualify this a bit
-                        if (!company.match(company_info.ignore)) {
-                            company = company_info.label;
+                    var company_label = companies.map[company_match[0].toLowerCase()];
+                    // We store additional company data to customize company matching behaviour, in particular to ignore or not affiliate companies with broadly-matching names.
+                    if (companies.ignore[company_label]) {
+                        // Some of the company names catch A LOT of stuff via regex, so `ignore` helps to qualify this a bit
+                        if (!company.match(companies.ignore[company_label])) {
+                            company = company_label;
                         }
                     } else {
-                        // If there is no ignore property in the company map, then we just use the string value returned from the company map
-                        company = company_info;
+                        // If there is no special ignore rule to further honour for this company, then we just use the string value returned from the company map
+                        company = company_label;
                     }
                 }
             } else {
