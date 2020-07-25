@@ -27,7 +27,7 @@ const github_tokens = require('./util/github_tokens.js');
 const companies = require('./util/companies.js');
 const db = require('./util/db.js');
 
-let sum = (array) => array.reduce((a, b) => a + b);
+let sum = (array) => array.reduce((a, b) => a + b, 0);
 let avg = (array) => sum(array) / array.length;
 let stdev = (array) => {
     let average = avg(array);
