@@ -65,7 +65,7 @@ module.exports = async function (argv) {
         end_time = moment();
         console.log('Firehose into BigQuery emptied in ' + end_time.from(start_time, true) + '! BigQuery Job details:', job.metadata.status.state, job.metadata.jobReference.jobId);
         let log_stats = (job) => {
-            console.log('BigQuery Job loaded', job.statistics.load.inputFileBytes, 'bytes yielding', job.statistics.load.outputRows, 'rows and', job.statistics.load.badRecords, 'bad records in', moment(parseInt(job.statistics.endTime)).from(moment(parseInt(job.statistics.startTime)), true));
+            console.log('BigQuery Job loaded', job);
         };
         if (job.metadata.status.state === 'DONE') {
             log_stats(job);
