@@ -93,6 +93,7 @@ module.exports = {
         behance: 'Adobe',
         bbc: 'BBC',
         baidu: 'Baidu',
+        azure: 'Microsoft',
         aws: 'Amazon',
         aviary: 'Adobe',
         automattic: 'Automattic',
