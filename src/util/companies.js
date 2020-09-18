@@ -39,6 +39,7 @@ module.exports = {
         snapchat: 'Snapchat',
         slack: 'Slack',
         shopify: 'Shopify',
+        sendgrid: 'Twilio',
         sap: 'SAP SE',
         samsung: 'Samsung',
         salesforce: 'Salesforce',
