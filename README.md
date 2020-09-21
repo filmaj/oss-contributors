@@ -1,10 +1,6 @@
-# Tracking Open Source Contributors [![Build Status](https://travis-ci.com/adobe/oss-contributors.svg?branch=master)](https://travis-ci.com/adobe/oss-contributors)
+# Tracking Open Source Contributors
 
 > Build a(n improved) ranking of companies-as-contributors-to-public-GitHub (based on [this blog post](https://medium.freecodecamp.org/the-top-contributors-to-github-2017-be98ab854e87)).
-
-## Too Long; Didn't Read
-
-Pretty graphs over [here](https://docs.google.com/spreadsheets/d/1EosxNv67tC2IYFY_RFeCoSY3JipiVfYyky9VejKAS9k/edit#gid=566883526).
 
 ## Why?
 
@@ -22,7 +18,27 @@ which is tracked via [githubarchive.org](http://githubarchive.org) data (and is
 from user's profiles and store those in a periodically-updated (currently
 monthly) database that we then copy over into BigQuery.
 
-## Features
+## Usage
+
+The underlying bits of this project can be complex, but hopefully I am doing a
+decent job hiding all of that away and exposing the most useful analytics
+through this program's CLI.
+
+### Requirements
+
+You will need a recent version of node.js and [BigQuery credentials](https://cloud.google.com/bigquery/docs/authentication/service-account-file) in order to
+access the data I manage. In order to get BigQuery credentials, you must sign up
+for a Google Cloud account. Only authenticated Google Cloud users have access to
+the underlying data I manage.
+
+Clone this repo, `cd` into it and run `npm install`.
+
+You are now ready to use the project. When in doubt, there should be decent
+built-in command-line help that you can invoke by running `./bin/oss.js help`.
+
+## Administrating this Project
+
+### Features
 
 - Leverages [githubarchive.org](http://githubarchive.org)'s [freely available dataset on Google BigQuery](https://www.githubarchive.org/#bigquery)
   to track public user activity on GitHub.
@@ -32,7 +48,7 @@ monthly) database that we then copy over into BigQuery.
 - Tracking and visualizing GitHub contributors from tech companies' activity
   over time in a [spreadsheet](https://docs.google.com/spreadsheets/d/1EosxNv67tC2IYFY_RFeCoSY3JipiVfYyky9VejKAS9k/edit#gid=566883526).
 
-## Implementation
+### Implementation
 
 We have a [BigQuery project](https://bigquery.cloud.google.com/dataset/public-github-adobe)
 with relevant supporting tables and queries. If you'd like access, contact @filmaj
@@ -52,7 +68,7 @@ with relevant supporting tables and queries. If you'd like access, contact @film
    user profile info, and drop the `company` field from that info into the DB
    table described in (1).
 
-### How Are Companies Tracked?
+#### How Are Companies Tracked?
 
 Check out the [`src/util/companies.js`](src/util/companies.js) file. How it
 works:
@@ -62,12 +78,6 @@ works:
 2. If a match is detected, then we try to map that back to a nicer label for a
    company name. Note that multiple expressions from the company catch-all may
    map to a single company (e.g. AWS, AMZN and Amazon all map back to Amazon).
-
-## TODO
-
-1. Describe how to use bigquery in conjunction with this repo.
-1. Real-time visualization of the data.
-2. Tests.
 
 ## Requirements
 

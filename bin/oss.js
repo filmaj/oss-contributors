@@ -25,7 +25,7 @@ yargs
         },
         internal: {
             alias: 'i',
-            desc: 'BigQuery-compatible WHERE clause to identify GitHub repositories as internal to the company. Recommended to assemble an expression that matches on the repository slug, that is, both the organization and repository name (e.g. the `repo` variable will have values such as adobe/react-spectrum, octokit/rest.js or microsoft/TypeScript. Include only the portion of the clause _after_ WHERE (the program will prefix your provided clause with NOT to determine repos external to the company). Take care! One can easily SQL inject themselves here! Example for identifying internal Twilio repos:\n"(STARTS_WITH(LOWER(repo), \'twilio\') OR STARTS_WITH(LOWER(repo), \'sendgrid\'))"',
+            desc: 'BigQuery-compatible WHERE clause to identify GitHub repositories as internal to the company. Recommended to assemble an expression that matches on the repository slug, that is, both the organization and repository name (e.g. the `repo` variable will have values such as adobe/react-spectrum, octokit/rest.js or microsoft/TypeScript). Include only the portion of the clause _after_ WHERE (the program will prefix your provided clause with NOT to determine repos external to the company). Take care! One can easily SQL inject themselves here! Example for identifying internal Twilio repos:\n"(STARTS_WITH(LOWER(repo), \'twilio\') OR STARTS_WITH(LOWER(repo), \'sendgrid\'))"',
             demandOption: 'You must provide a WHERE clause to identify internal repositories!'
         },
         company: {
