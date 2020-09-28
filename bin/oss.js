@@ -15,6 +15,7 @@ const db_to_bigquery = require('../src/db-to-bigquery.js');
 const update_db = require('../src/update-db.js');
 const rank = require('../src/rank.js');
 const contributions_csv = require('../src/contributions_csv.js');
+const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
 
 yargs
     .command('company-contributions-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos, differentiating between internal vs. external repository activity. Bucketed by quarter, starting from 2018-Q1. Outputs to a CSV file.', {
@@ -39,6 +40,27 @@ yargs
             demandOption: 'You must provide a path to a Google Cloud credentials JSON file!'
         }
     }, contributions_csv)
+    .command('bigquery-to-dynamo', 'Move data from BigQuery users-companies style tables to AWS DynamoDB', {
+        source: {
+            alias: 's',
+            demandOption: 'You must provide a BigQuery table name as a source!',
+            desc: 'BigQuery table name housing user-company associations'
+        },
+        startdate: {
+            demandOption: 'You must provide a startdate in UNIX timestamp epoch (milliseconds)',
+            desc: 'Start date, as a number, will be blased into dynamo'
+        },
+        destination: {
+            alias: 'd',
+            demandOption: 'You must provide a Dynamo table name as a destination ',
+            'desc': 'DynamoDB table name for destination of data'
+        },
+        region: {
+            alias: 'r',
+            demandOption: 'You must provide an AWS region string',
+            desc: 'AWS region string, i.e. us-east-2'
+        }
+    }, bigquery_to_dynamo)
     .command('rank-corporations <source> [limit]', false/* 'show top [limit] companies based on number of active GitHubbers, parsed from the <source> BigQuery table'*/, {
         source: {
             alias: 's',
