@@ -34,7 +34,7 @@ const arctable = 'ArcOssContributorsStaging-UsersTable-1481B6ZLNL931';
 
 module.exports = async function (argv) {
     const TABLE_ID = argv.source;
-    const startdate = argv.startdate;
+    const startdate = Number(argv.startdate);
     const arctable = argv.destination;
     const region = argv.region;
     const dataset = bigquery.dataset(DATASET_ID);
