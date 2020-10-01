@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 */
 
 const fs = require('fs-extra');
-const Octokit = require('@octokit/rest');
+const {Octokit} = require('@octokit/rest');
 
 let tokens = [];
 let limit_map = {};
