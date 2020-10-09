@@ -16,14 +16,13 @@ moment.relativeTimeThreshold('m', 55);
 moment.relativeTimeThreshold('ss', 5);
 moment.relativeTimeThreshold('s', 55);
 const PROJECT_ID = 'public-github-adobe';
-const DATASET_ID = 'github_archive_query_views';
 const bigquery = new BigQuery({
     projectId: PROJECT_ID,
     keyFilename: 'bigquery.json'
 });
 const csv_writer = require('csv-writer').createArrayCsvWriter;
 
-const quarters = ['2018_q1', '2018_q2', '2018_q3', '2018_q4', '2019_q1', '2019_q2', '2019_q3', '2019_q4', '2020_q1', '2020_q2'];
+const quarters = ['2018_q1', '2018_q2', '2018_q3', '2018_q4', '2019_q1', '2019_q2', '2019_q3', '2019_q4', '2020_q1', '2020_q2', '2020_q3'];
 const header = ['Period', 'Total Contributions', 'External Contributions', 'Internal Contributions', 'Internal Contribution %', 'Total Contributors', 'External Contributors', 'External Contributor %', 'Internal Contributors', 'Internal Contributor %', 'Repo Rank', 'External Repo Contributed To', 'Repo Contributors', 'Repo Contributions', 'External Contribution %', 'External Contributor %'];
 
 module.exports = async function (argv) {
@@ -32,6 +31,10 @@ module.exports = async function (argv) {
         header,
         alwaysQuote: true
     });
+    let activity_where_clause = argv.company;
+    // in case we want to filter down on specific kinds of contributions, can do
+    // it by uncommenting and tweaking the next line
+    // activity_where_clause = `type = 'IssuesEvent' AND ${argv.company}`;
 
     for (let q = 0; q < quarters.length; q++) {
         let quarter = quarters[q];
@@ -44,7 +47,7 @@ module.exports = async function (argv) {
 
         all_activity AS (SELECT repo, DistinctCount(ARRAY_CONCAT_AGG( contributors)) contributors, SUM(contributions) contributions
         FROM \`github_archive_query_views.company_repo_contributions_${quarter}\`
-        WHERE ${argv.company}
+        WHERE ${activity_where_clause}
         GROUP BY repo
         ORDER BY contributors DESC, contributions DESC
         ),
@@ -82,7 +85,7 @@ module.exports = async function (argv) {
         WITH
         all_activity AS (SELECT repo, DistinctCount(ARRAY_CONCAT_AGG( contributors)) contributors, SUM(contributions) contributions
         FROM \`github_archive_query_views.company_repo_contributions_${quarter}\`
-        WHERE ${argv.company}
+        WHERE ${activity_where_clause}
         GROUP BY repo
         ORDER BY contributors DESC, contributions DESC
         )

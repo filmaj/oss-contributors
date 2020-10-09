@@ -5,18 +5,18 @@ period AS (
   FROM `githubarchive.month.201801` a # what period of time being queried
 ),
 repo_stars AS (
-  SELECT repo.id, COUNT(DISTINCT actor.login) stars, APPROX_TOP_COUNT(repo.name, 1)[OFFSET(0)].value repo_name 
+  SELECT repo.id, COUNT(DISTINCT actor.login) stars, APPROX_TOP_COUNT(repo.name, 1)[OFFSET(0)].value repo_name
   FROM period
   WHERE type='WatchEvent'
   GROUP BY 1
   HAVING stars > 0 # only look at repos that had X new stars over the selected time period
-), 
+),
 pushers_and_projects AS (
   SELECT * FROM (
     SELECT actor.id
       , APPROX_TOP_COUNT(actor.login,1)[OFFSET(0)].value login
       , COUNT(*) c
-      , b.repo_name 
+      , b.repo_name
       , APPROX_TOP_COUNT(b.stars,1)[OFFSET(0)].value stars
     FROM period a
     JOIN repo_stars b
