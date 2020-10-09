@@ -2,7 +2,7 @@
 WITH
 period AS (
   SELECT *
-  FROM `githubarchive.month.201801` a # what period of time being queried
+  FROM `githubarchive.month.2020*` a # what period of time being queried
 ),
 repo_stars AS (
   SELECT repo.id, COUNT(DISTINCT actor.login) stars, APPROX_TOP_COUNT(repo.name, 1)[OFFSET(0)].value repo_name
@@ -21,18 +21,18 @@ pushers_and_projects AS (
     FROM period a
     JOIN repo_stars b
     ON a.repo.id = b.id
-    WHERE type='PushEvent'
+    WHERE (type='PushEvent' OR type='PullRequestEvent' OR type='IssuesEvent' OR type='PullRequestReviewCommentEvent')
     GROUP BY 1, b.repo_name
-    HAVING c > 0 # ensure each contributor has at least X commits to each project
+    HAVING c > 0 # ensure each contributor has at least X contributions to each project
   ) z
   JOIN `github_archive_query_views.users_companies` y # this is our relational data containing user-co associations
   ON z.login = y.user
 )
 SELECT   login
-       , SUM(c) as total_pushes
+       , SUM(c) as contributions
        , SUM(stars) as total_stars
        , ARRAY_AGG(DISTINCT TO_JSON_STRING(STRUCT(repo_name,stars,c as pushes))) # array-based sub-breakdown of different repos an individual has contributed to
 FROM pushers_and_projects
 WHERE company = 'Adobe Systems'
 GROUP BY login
-ORDER BY total_stars DESC, total_pushes DESC
+ORDER BY total_stars DESC, contributions DESC
