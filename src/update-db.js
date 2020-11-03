@@ -44,6 +44,12 @@ let stdev = (array) => {
 module.exports = async function (argv) {
     let octokit;
     let db_conn = await db.connection.async(argv);
+    if (argv.drop) {
+        console.log('Dropping MySQL table...');
+        await db_conn.query(`DROP TABLE ${argv.dbName}.${argv.tableName}`);
+        await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256) NOT NULL, matchedcompany varchar(256) NOT NULL, fingerprint varchar(64))`);
+        console.log('...complete.');
+    }
     let row_marker = false; // a file that tells us how many github usernames (from the githubarchive activity stream) weve already processed
     let cache = {};
     let requested_from_db = {};
@@ -126,7 +132,7 @@ module.exports = async function (argv) {
                 let db_read_et = new Date().valueOf();
                 DB_read_calls.push(db_read_et - db_read_st);
                 if (read_result.length) {
-                    cache[login] = [read_result[0].company, read_result[0].fingerprint];
+                    cache[login] = [read_result[0].rawcompany, read_result[0].matchedcompany, read_result[0].fingerprint];
                 }
                 requested_from_db[login] = true;
             }
@@ -134,7 +140,7 @@ module.exports = async function (argv) {
             // This may possibly trip the error flow via a returned 304 Not Modified HTTP status
             if (cache[login]) {
                 options.headers = {
-                    'If-None-Match': '"' + cache[login][1] + '"'
+                    'If-None-Match': '"' + cache[login][2] + '"'
                 };
             }
             row_marker++;
@@ -170,33 +176,33 @@ module.exports = async function (argv) {
                 continue;
             }
             let etag = profile.headers.etag.replace(/"/g, '').replace(/^W\//g, '');
-            let company = profile.data.company;
-            if (!companies.is_empty(company)) {
-                let company_match = company.match(companies.catch_all);
+            let rawcompany = profile.data.company;
+            let matchedcompany = '';
+            if (!companies.is_empty(rawcompany)) {
+                let company_match = rawcompany.match(companies.catch_all);
                 if (company_match) {
                     var company_label = companies.map[company_match[0].toLowerCase()];
                     // We store additional company data to customize company matching behaviour, in particular to ignore or not affiliate companies with broadly-matching names.
                     if (companies.ignore[company_label]) {
                         // Some of the company names catch A LOT of stuff via regex, so `ignore` helps to qualify this a bit
-                        if (!company.match(companies.ignore[company_label])) {
-                            company = company_label;
+                        if (!rawcompany.match(companies.ignore[company_label])) {
+                            matchedcompany = company_label;
                         }
                     } else {
                         // If there is no special ignore rule to further honour for this company, then we just use the string value returned from the company map
-                        company = company_label;
+                        matchedcompany = company_label;
                     }
                 }
-            } else {
-                company = '';
             }
             let statement = '';
             let values = [];
             if (cache[login]) {
                 // user already exists in our DB, may need to prepare an UPDATE statement if the company changed.
-                if (company !== cache[login][0]) {
-                    statement = 'UPDATE ' + argv.dbName + '.' + argv.tableName + ' SET company = ?, fingerprint = ? WHERE user = ?';
-                    values = [company, etag, login];
-                    cache[login][0] = company;
+                if (rawcompany !== cache[login][0] || matchedcompany !== cache[login][1]) {
+                    statement = `UPDATE ${argv.dbName}.${argv.tableName} SET rawcompany = ?, matchedcompany = ?, fingerprint = ? WHERE user = ?`;
+                    values = [rawcompany, matchedcompany, etag, login];
+                    cache[login][0] = rawcompany;
+                    cache[login][1] = matchedcompany;
                 } else {
                     // If company is the same, move on.
                     company_unchanged++;
@@ -205,16 +211,13 @@ module.exports = async function (argv) {
                 }
             } else {
                 // user does not exist in our DB, time for an INSERT statement
-                statement = 'INSERT INTO ' + argv.dbName + '.' + argv.tableName + ' (user, company, fingerprint) VALUES (?, ?, ?)';
-                values = [login, company, etag];
-                cache[login] = [company, etag];
+                statement = `INSERT INTO ${argv.dbName}.${argv.tableName} (user, rawcompany, matchedcompany, fingerprint) VALUES (?, ?, ?, ?)`;
+                values = [login, rawcompany, matchedcompany, etag];
+                cache[login] = [rawcompany, matchedcompany, etag];
                 requested_from_db[login] = true;
             }
             s = new Date().valueOf();
             try {
-                // TODO: Instead of awaiting on the query here, can we toss it to a background "thread" ?
-                // To be fair typical exec times here are 3ms. UPDATE: these
-                // days it is 150+ms!
                 let db_results = await db_conn.query(statement, values);
                 et = new Date().valueOf();
                 if (db_results.affectedRows) db_updates++;

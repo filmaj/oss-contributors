@@ -85,6 +85,11 @@ yargs
             alias: 's',
             demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
             desc: 'BigQuery table name housing GitHub.com activity data'
+        },
+        drop: {
+            alias: 'D',
+            default: false,
+            desc: 'Drop the temporary usercompany MySQL table'
         }
     }, update_db)
     .env('OSS')
