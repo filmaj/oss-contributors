@@ -44,7 +44,7 @@ let stdev = (array) => {
 module.exports = async function (argv) {
     let octokit;
     let db_conn = await db.connection.async(argv);
-    if (argv.drop) {
+    if (argv.drop || argv.D) {
         console.log('Dropping MySQL table...');
         await db_conn.query(`DROP TABLE ${argv.dbName}.${argv.tableName}`);
         await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256) NOT NULL, matchedcompany varchar(256) NOT NULL, fingerprint varchar(64))`);
@@ -221,15 +221,23 @@ module.exports = async function (argv) {
                 let db_results = await db_conn.query(statement, values);
                 et = new Date().valueOf();
                 if (db_results.affectedRows) db_updates++;
-                else db_fails++;
+                else {
+                    db_fails++;
+                    console.error('error issuing db update!', db_results);
+                    console.log('\n');
+                }
             } catch (e) {
                 et = new Date().valueOf();
                 db_fails++;
                 if (e.code) {
                     if (db_errors[e.code]) db_errors[e.code]++;
                     else db_errors[e.code] = 1;
+                    console.error('db error!', e.message);
+                    console.error('bad query was', statement, 'with values', values);
+                    console.log('\n');
                 } else {
                     console.warn('DB update error, with no error code either :o, details:', e);
+                    console.log('\n');
                 }
             }
             DB_write_calls.push(et - s);
