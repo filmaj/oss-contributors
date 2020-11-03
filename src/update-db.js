@@ -47,7 +47,8 @@ module.exports = async function (argv) {
     if (argv.drop || argv.D) {
         console.log('Dropping MySQL table...');
         await db_conn.query(`DROP TABLE ${argv.dbName}.${argv.tableName}`);
-        await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256) NOT NULL, matchedcompany varchar(256) NOT NULL, fingerprint varchar(64))`);
+        console.log('...creating MySQL table...');
+        await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256), matchedcompany varchar(256), fingerprint varchar(64))`);
         console.log('...complete.');
     }
     let row_marker = false; // a file that tells us how many github usernames (from the githubarchive activity stream) weve already processed
@@ -177,7 +178,7 @@ module.exports = async function (argv) {
             }
             let etag = profile.headers.etag.replace(/"/g, '').replace(/^W\//g, '');
             let rawcompany = profile.data.company;
-            let matchedcompany = '';
+            let matchedcompany = null;
             if (!companies.is_empty(rawcompany)) {
                 let company_match = rawcompany.match(companies.catch_all);
                 if (company_match) {
