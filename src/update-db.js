@@ -48,7 +48,7 @@ module.exports = async function (argv) {
         console.log('Dropping MySQL table...');
         await db_conn.query(`DROP TABLE ${argv.dbName}.${argv.tableName}`);
         console.log('...creating MySQL table...');
-        await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256), matchedcompany varchar(256), fingerprint varchar(64))`);
+        await db_conn.query(`CREATE TABLE ${argv.dbName}.${argv.tableName} (user varchar(100) NOT NULL PRIMARY KEY, rawcompany varchar(256), matchedcompany varchar(256), fingerprint varchar(64)) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci`);
         console.log('...complete.');
     }
     let row_marker = false; // a file that tells us how many github usernames (from the githubarchive activity stream) weve already processed

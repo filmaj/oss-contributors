@@ -48,7 +48,7 @@ module.exports = async function (argv) {
     }
     console.log('Creating new table...');
     await dataset.createTable(TABLE_ID, {
-        schema: 'user,company'
+        schema: 'user,rawcompany,matchedcompany'
     });
     console.log('... complete.');
     table = dataset.table(TABLE_ID);
@@ -89,7 +89,8 @@ module.exports = async function (argv) {
             }
             callback(null, {
                 user: record.user,
-                company: record.company
+                rawcompany: record.rawcompany,
+                matchedcompany: record.matchedcompany
             });
         }))
         .pipe(JSONStream.stringify(false))
