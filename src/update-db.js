@@ -44,7 +44,8 @@ let stdev = (array) => {
 module.exports = async function (argv) {
     let octokit;
     let db_conn = await db.connection.async(argv);
-    await db_conn.query('SET NAMES \'utf8\';SET CHARACTER SET utf8;');
+    await db_conn.query('SET NAMES \'utf8\'');
+    await db_conn.query('SET CHARACTER SET utf8');
     if (argv.drop || argv.D) {
         console.log('Dropping MySQL table...');
         await db_conn.query(`DROP TABLE ${argv.dbName}.${argv.tableName}`);
