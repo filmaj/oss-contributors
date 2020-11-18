@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 */
 const yargs = require('yargs');
 const db_to_bigquery = require('../src/db-to-bigquery.js');
+const csv_to_bigquery = require('../src/csv-to-bigquery.js');
 const update_db = require('../src/update-db.js');
 const rank = require('../src/rank.js');
 const contributions_csv = require('../src/contributions_csv.js');
@@ -80,6 +81,30 @@ yargs
             desc: 'BigQuery table to send data to'
         }
     }, db_to_bigquery)
+    .command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
+        source: {
+            alias: 's',
+            demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
+            desc: 'BigQuery table name housing GitHub.com activity data'
+        },
+        drop: {
+            alias: 'D',
+            default: false,
+            desc: 'Drop the temporary usercompany MySQL table'
+        }
+    }, update_db)
+    .command('csv-to-bigquery <input> <output>', 'Send a csv to bigquery', {
+        output: {
+            alias: 'o',
+            demandOption: 'You must provide a BigQuery table name to send data to',
+            desc: 'BigQuery table to send data to'
+        },
+        input: {
+            alias: 'i',
+            demandOption: 'You must provide a CSV file to use as input',
+            desc: 'Input .csv file to send to BigQuery'
+        }
+    }, csv_to_bigquery)
     .command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
         source: {
             alias: 's',
