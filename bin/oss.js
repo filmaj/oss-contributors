@@ -16,9 +16,32 @@ const csv_to_bigquery = require('../src/csv-to-bigquery.js');
 const update_db = require('../src/update-db.js');
 const rank = require('../src/rank.js');
 const contributions_csv = require('../src/contributions_csv.js');
+const companies_project_csv = require('../src/companies_project_csv.js');
 const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
 
 yargs
+    .command('companies-project-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos. Bucketed by month, starting from 2018-01. Outputs to a CSV file.', {
+        contributorFile: {
+            alias: 'o',
+            default: 'project-activity-contributors.csv',
+            desc: 'Filename to write CSV data of project activity based on contributors to.'
+        },
+        contributionFile: {
+            alias: 'i',
+            default: 'project-activity-contributions.csv',
+            desc: 'Filename to write CSV data of project activity based on contributions to.'
+        },
+        activityFile: {
+            alias: 'a',
+            default: 'project-activity-raw.csv',
+            desc: 'Filename to write CSV data of raw project activity.'
+        },
+        googlecloud: {
+            alias: 'g',
+            desc: 'Path to Google Cloud credentials JSON file. For information on how to generate this file, see https://cloud.google.com/docs/authentication/getting-started',
+            default: 'bigquery.json'
+        }
+    }, companies_project_csv)
     .command('company-contributions-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos, differentiating between internal vs. external repository activity. Bucketed by quarter, starting from 2018-Q1. Outputs to a CSV file.', {
         output: {
             alias: 'o',
