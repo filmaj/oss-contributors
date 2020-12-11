@@ -21,6 +21,7 @@ CREATE TEMP FUNCTION IsInternal(company STRING, repo STRING) AS (
 CREATE TEMP FUNCTION MassageCompany(company STRING) AS (
   CASE
     WHEN CAST(STRPOS(LOWER(company), 'adobe') AS BOOL) THEN 'Adobe'
+    WHEN CAST(STRPOS(LOWER(company), 'autodesk') AS BOOL) THEN 'Autodesk'
     WHEN CAST(STRPOS(LOWER(company), 'dropbox') AS BOOL) THEN 'Dropbox'
     WHEN CAST(STRPOS(LOWER(company), 'twilio') AS BOOL) OR CAST(STRPOS(LOWER(company), 'sendgrid') AS BOOL) THEN 'Twilio'
     WHEN (NOT CAST(STRPOS(LOWER(company), 'intuitive') AS BOOL)) AND CAST(STRPOS(LOWER(company), 'intuit') AS BOOL) THEN 'Intuit'
