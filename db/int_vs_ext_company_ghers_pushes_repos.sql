@@ -18,10 +18,20 @@ CREATE TEMP FUNCTION IsInternal(company STRING, repo STRING) AS (
     ELSE FALSE
   END
 );
+CREATE TEMP FUNCTION MassageCompany(company STRING) AS (
+  CASE
+    WHEN CAST(STRPOS(LOWER(company), 'adobe') AS BOOL) THEN 'Adobe'
+    WHEN CAST(STRPOS(LOWER(company), 'dropbox') AS BOOL) THEN 'Dropbox'
+    WHEN CAST(STRPOS(LOWER(company), 'twilio') AS BOOL) OR CAST(STRPOS(LOWER(company), 'sendgrid') AS BOOL) THEN 'Twilio'
+    WHEN (NOT CAST(STRPOS(LOWER(company), 'intuitive') AS BOOL)) AND CAST(STRPOS(LOWER(company), 'intuit') AS BOOL) THEN 'Intuit'
+    WHEN CAST(STRPOS(LOWER(company), 'pinterest') AS BOOL) THEN 'Pinterest'
+    ELSE company
+  END
+);
 WITH
 period AS (
   SELECT *
-  FROM (SELECT * FROM `githubarchive.month.202001` UNION ALL SELECT * FROM `githubarchive.month.202002` UNION ALL SELECT * FROM `githubarchive.month.202003` UNION ALL SELECT * FROM `githubarchive.month.202004` UNION ALL SELECT * FROM `githubarchive.month.202005` UNION ALL SELECT * FROM `githubarchive.month.202006` UNION ALL SELECT * FROM `githubarchive.month.202007` UNION ALL SELECT * FROM `githubarchive.month.202008` UNION ALL SELECT * FROM `githubarchive.month.202009` UNION ALL SELECT * FROM `githubarchive.month.202010`  UNION ALL SELECT * FROM `githubarchive.month.202011`
+  FROM (SELECT * FROM `githubarchive.month.201801` UNION ALL SELECT * FROM `githubarchive.month.201802` UNION ALL SELECT * FROM `githubarchive.month.201803`# UNION ALL SELECT * FROM `githubarchive.month.202004` UNION ALL SELECT * FROM `githubarchive.month.202005` UNION ALL SELECT * FROM `githubarchive.month.202006` UNION ALL SELECT * FROM `githubarchive.month.202007` UNION ALL SELECT * FROM `githubarchive.month.202008` UNION ALL SELECT * FROM `githubarchive.month.202009` UNION ALL SELECT * FROM `githubarchive.month.202010`  UNION ALL SELECT * FROM `githubarchive.month.202011`
   ) a
 ),
 repo_stars AS (
@@ -32,26 +42,30 @@ repo_stars AS (
   HAVING stars > 0 # only look at repos that had X new stars over the selected time period
 ),
 user_repo_pushes AS (
-  SELECT actor.login, APPROX_TOP_COUNT(company, 1)[OFFSET(0)].value as company, b.repo_name, COUNT(*) as pushes
+  SELECT actor.login, b.repo_name, COUNT(*) as pushes
     FROM period a
     JOIN repo_stars b ON a.repo.id = b.id
-    JOIN `public-github-adobe.github_archive_query_views.users_companies_2020` y ON actor.login = y.user
     WHERE type='PushEvent'
     GROUP BY login, repo_name
 ),
-int_pushes AS (SELECT company, SUM(pushes) as pushes, COUNT(*) as users
-  #repo_name, pushes
-FROM user_repo_pushes
-WHERE IsInternal(company, repo_name)
-GROUP BY company
+company_pushes AS (
+  SELECT *, MassageCompany(z.company) as co,
+  FROM user_repo_pushes y
+  JOIN `public-github-adobe.github_archive_query_views.users_companies_2018` z ON y.login = z.user
 ),
-ext_pushes AS (SELECT company, SUM(pushes) as pushes, COUNT(*) as users
-  #repo_name, pushes
-FROM user_repo_pushes
-WHERE NOT IsInternal(company, repo_name)
-GROUP BY company
+int_pushes AS (
+  SELECT co, SUM(pushes) as pushes
+  FROM company_pushes
+  WHERE IsInternal(co, repo_name)
+  GROUP BY co
+),
+ext_pushes AS (
+  SELECT co, SUM(pushes) as pushes
+  FROM company_pushes
+  WHERE NOT IsInternal(co, repo_name)
+  GROUP BY co
 )
-SELECT int_pushes.company as company, int_pushes.pushes as int_pushes, int_pushes.users as int_users, ext_pushes.pushes as ext_pushes, ext_pushes.users as ext_users, (int_pushes.pushes + ext_pushes.pushes) as total_pushes
+SELECT int_pushes.co as company, int_pushes.pushes as int_pushes, ext_pushes.pushes as ext_pushes, (int_pushes.pushes + ext_pushes.pushes) as total_pushes
 FROM int_pushes
-JOIN ext_pushes ON int_pushes.company = ext_pushes.company
+JOIN ext_pushes ON int_pushes.co = ext_pushes.co
 ORDER BY total_pushes DESC
