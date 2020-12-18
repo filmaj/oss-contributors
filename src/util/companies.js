@@ -129,6 +129,7 @@ module.exports = {
             n.indexOf('individual') === -1;
     },
     ignore: {
+        'Microsoft': /\.github\.io/i,
         'Cisco Systems': /francisco/i,
         'Amazon': /[a-z]aws|aws[a-z]|amazonas/i
     },
