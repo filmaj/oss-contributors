@@ -14,9 +14,20 @@ governing permissions and limitations under the License.
 // affiliation.
 module.exports = {
     xmcclure: 'Mermaid Heavy Industries', // https://www.linkedin.com/in/andi-mcclure-47910835/
+    'typescript-bot': 'bot', // not a human
     timrisi: 'KickBack Rewards Systems', // https://www.linkedin.com/in/timothyrisi/
     smartin821: 'Wrike', // https://www.linkedin.com/in/seanmartin2/
+    rdxvsrmv: 'bot', // not a human
+    opse2esa: 'bot', // not a human
+    olprod: 'bot', // not a human
+    'msft-github-bot': 'bot', // not a human
+    microsoftopensource: 'bot', // not a human
+    hubot: 'bot', // not a human
+    glotbot: 'bot', // not a human
+    'electron-bot': 'bot', // not a human
     cramforce: 'Google', // https://www.linkedin.com/in/malteubl/
     betai: 'Google', // https://www.linkedin.com/in/betaikoffi/
-    Devneval: 'Lumilinks', // https://www.linkedin.com/in/coderdavid/
+    'azure-sdk': 'bot', // not a human
+    OPSTestPPE: 'bot', // not a human
+    Devneval: 'Lumilinks' // https://www.linkedin.com/in/coderdavid/
 };
