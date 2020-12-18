@@ -130,7 +130,7 @@ module.exports = {
             n.indexOf('individual') === -1;
     },
     ignore: {
-        'Microsoft': /\.github\.io|github\.com\/[a-z0-9]|MicrosoftSTC/i,
+        'Microsoft': /\.github\.io|github\.com\/[a-z0-9]|MicrosoftSTC|[a-z]Xamarin|Xamarin[ -]*[a-z]/i,
         'Cisco Systems': /francisco/i,
         'Amazon': /[a-z]aws|aws[a-z]|amazonas/i
     },

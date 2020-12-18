@@ -25,6 +25,7 @@ const bigquery = new BigQuery({
 const row_module = require('./util/row_marker.js');
 const github_tokens = require('./util/github_tokens.js');
 const companies = require('./util/companies.js');
+const users_with_wrong_info = require('./util/users_with_wrong_info.js');
 const db = require('./util/db.js');
 
 let sum = (array) => array.reduce((a, b) => a + b, 0);
@@ -152,49 +153,58 @@ module.exports = async function (argv) {
             let s = new Date().valueOf();
             let et = new Date().valueOf();
             let error_msg;
-            try {
-                // TODO: the following call is the most expensive during this operation: usually about 200ms.
-                // What can we do to speed this up?
-                profile = await octokit.users.getByUsername(options);
-                et = new Date().valueOf();
-                GH_calls.push(et - s);
-            } catch (e) {
-                et = new Date().valueOf();
-                GH_calls.push(et - s);
-                switch (e.status) {
-                case 404: // profile not found, user deleted their account now
-                    not_founds++;
-                    break;
-                case 304: // profile not modified since last retrieval (via ETag)
-                    cache_hits++;
-                    break;
-                default:
-                    if (e.status) {
-                        error_msg = `Error Status Code: ${e.status}`;
-                    } else {
-                        error_msg = e;
-                    }
-                    console.warn(`Error retrieving profile info for ${login} - moving on. ${error_msg}`);
-                }
-                process.stdout.write('Processed ' + counter + ' records in ' + end_time.from(start_time, true) + '                     \r');
-                continue;
-            }
-            let etag = profile.headers.etag.replace(/"/g, '').replace(/^W\//g, '');
-            let rawcompany = profile.data.company;
+            let etag = '';
             let matchedcompany = null;
-            if (!companies.is_empty(rawcompany)) {
-                let company_match = rawcompany.match(companies.catch_all);
-                if (company_match) {
-                    var company_label = companies.map[company_match[0].toLowerCase()];
-                    // We store additional company data to customize company matching behaviour, in particular to ignore or not affiliate companies with broadly-matching names.
-                    if (companies.ignore[company_label]) {
-                        // Some of the company names catch A LOT of stuff via regex, so `ignore` helps to qualify this a bit
-                        if (!rawcompany.match(companies.ignore[company_label])) {
+            let rawcompany = '';
+            // Some people just make data analysis at scale super hard by not
+            // updating their own info. For shame!
+            if (users_with_wrong_info[login]) {
+                matchedcompany = users_with_wrong_info[login];
+                rawcompany = matchedcompany;
+            } else {
+                try {
+                    // TODO: the following call is the most expensive during this operation: usually about 200ms.
+                    // What can we do to speed this up?
+                    profile = await octokit.users.getByUsername(options);
+                    et = new Date().valueOf();
+                    GH_calls.push(et - s);
+                } catch (e) {
+                    et = new Date().valueOf();
+                    GH_calls.push(et - s);
+                    switch (e.status) {
+                    case 404: // profile not found, user deleted their account now
+                        not_founds++;
+                        break;
+                    case 304: // profile not modified since last retrieval (via ETag)
+                        cache_hits++;
+                        break;
+                    default:
+                        if (e.status) {
+                            error_msg = `Error Status Code: ${e.status}`;
+                        } else {
+                            error_msg = e;
+                        }
+                        console.warn(`Error retrieving profile info for ${login} - moving on. ${error_msg}`);
+                    }
+                    process.stdout.write('Processed ' + counter + ' records in ' + end_time.from(start_time, true) + '                     \r');
+                    continue;
+                }
+                etag = profile.headers.etag.replace(/"/g, '').replace(/^W\//g, '');
+                rawcompany = profile.data.company;
+                if (!companies.is_empty(rawcompany)) {
+                    let company_match = rawcompany.match(companies.catch_all);
+                    if (company_match) {
+                        var company_label = companies.map[company_match[0].toLowerCase()];
+                        // We store additional company data to customize company matching behaviour, in particular to ignore or not affiliate companies with broadly-matching names.
+                        if (companies.ignore[company_label]) {
+                            // Some of the company names catch A LOT of stuff via regex, so `ignore` helps to qualify this a bit
+                            if (!rawcompany.match(companies.ignore[company_label])) {
+                                matchedcompany = company_label;
+                            }
+                        } else {
+                            // If there is no special ignore rule to further honour for this company, then we just use the string value returned from the company map
                             matchedcompany = company_label;
                         }
-                    } else {
-                        // If there is no special ignore rule to further honour for this company, then we just use the string value returned from the company map
-                        matchedcompany = company_label;
                     }
                 }
             }
