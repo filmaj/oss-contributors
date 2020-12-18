@@ -19,6 +19,7 @@ module.exports = {
         yelp: 'Yelp',
         yandex: 'Yandex',
         yahoo: 'Yahoo!',
+        xamarin: 'Microsoft',
         wso2: 'WSO2',
         workday: 'Workday',
         wix: 'WIX',
