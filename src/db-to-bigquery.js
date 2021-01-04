@@ -68,7 +68,7 @@ module.exports = async function (argv) {
             console.log('BigQuery Job loaded', job);
         };
         if (job.metadata.status.state === 'DONE') {
-            log_stats(job);
+            process.exit(0);
         } else {
             console.log('Now we wait for the Job to finish...');
             job.on('complete', log_stats);
