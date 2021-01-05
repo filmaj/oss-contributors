@@ -45,12 +45,10 @@ built-in command-line help that you can invoke by running `./bin/oss.js help`.
 - A GitHub.com REST API crawler that pulls users' company associations (based
   on their public profile), that we then store in a database (and periodically
   update).
-- Tracking and visualizing GitHub contributors from tech companies' activity
-  over time in a [spreadsheet](https://docs.google.com/spreadsheets/d/1EosxNv67tC2IYFY_RFeCoSY3JipiVfYyky9VejKAS9k/edit#gid=566883526).
 
 ### Implementation
 
-We have a [BigQuery project](https://bigquery.cloud.google.com/dataset/public-github-adobe)
+We have a [BigQuery project](https://console.cloud.google.com/bigquery?project=public-github-adobe)
 with relevant supporting tables and queries. If you'd like access, contact @filmaj
 (via an issue in this repo or on twitter). This project contains:
 
