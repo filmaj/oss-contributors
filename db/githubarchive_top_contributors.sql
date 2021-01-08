@@ -25,7 +25,7 @@ pushers_and_projects AS (
     GROUP BY 1, b.repo_name
     HAVING c > 0 # ensure each contributor has at least X contributions to each project
   ) z
-  JOIN `github_archive_query_views.users_companies` y # this is our relational data containing user-co associations
+  JOIN `github_archive_query_views.users_companies_2020` y # this is our relational data containing user-co associations
   ON z.login = y.user
 )
 SELECT   login

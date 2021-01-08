@@ -18,16 +18,20 @@ module.exports = {
     timrisi: 'KickBack Rewards Systems', // https://www.linkedin.com/in/timothyrisi/
     smartin821: 'Wrike', // https://www.linkedin.com/in/seanmartin2/
     rdxvsrmv: 'bot', // not a human
+    purvilmehta06: 'Student', // https://www.linkedin.com/in/purvil-mehta/
     opse2esa: 'bot', // not a human
     olprod: 'bot', // not a human
     'msft-github-bot': 'bot', // not a human
     microsoftopensource: 'bot', // not a human
     hubot: 'bot', // not a human
     glotbot: 'bot', // not a human
+    gannonprudhomme: 'Student', // https://www.linkedin.com/in/gannon-prudhomme/
     'electron-bot': 'bot', // not a human
     cramforce: 'Google', // https://www.linkedin.com/in/malteubl/
     betai: 'Google', // https://www.linkedin.com/in/betaikoffi/
     'azure-sdk': 'bot', // not a human
+    awsmobilesdk: 'bot', // not a human
     OPSTestPPE: 'bot', // not a human
+    JunBinLiang: '', // https://www.linkedin.com/in/junbin-liang-482556176/
     Devneval: 'Lumilinks' // https://www.linkedin.com/in/coderdavid/
 };
