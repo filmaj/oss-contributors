@@ -77,7 +77,7 @@ module.exports = {
         guardian: 'The Guardian',
         grafana: 'Grafana Labs',
         google: 'Google',
-        gitlab: 'GitLab'
+        gitlab: 'GitLab',
         github: 'Microsoft',
         fotolia: 'Adobe',
         facebook: 'Facebook',
