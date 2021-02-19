@@ -17,9 +17,16 @@ const update_db = require('../src/update-db.js');
 const rank = require('../src/rank.js');
 const contributions_csv = require('../src/contributions_csv.js');
 const companies_project_csv = require('../src/companies_project_csv.js');
+const strip_json = require('../src/strip-json.js');
 const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
 
 yargs
+    .command('strip-json', 'Parses and strips GitHub Archive JSON dumps into smaller, customizable payloads.', {
+        input: {
+            alias: 'i',
+            desc: 'Path to GitHub Archive payload JSON file'
+        }
+    }, strip_json)
     .command('companies-project-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos. Bucketed by month, starting from 2018-01. Outputs to a CSV file.', {
         contributorFile: {
             alias: 'o',
