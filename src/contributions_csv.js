@@ -15,17 +15,17 @@ const moment = require('moment');
 moment.relativeTimeThreshold('m', 55);
 moment.relativeTimeThreshold('ss', 5);
 moment.relativeTimeThreshold('s', 55);
-const PROJECT_ID = 'public-github-adobe';
-const bigquery = new BigQuery({
-    projectId: PROJECT_ID,
-    keyFilename: 'bigquery.json'
-});
 const csv_writer = require('csv-writer').createArrayCsvWriter;
 
 const quarters = ['2018_q1', '2018_q2', '2018_q3', '2018_q4', '2019_q1', '2019_q2', '2019_q3', '2019_q4', '2020_q1', '2020_q2', '2020_q3'];
 const header = ['Period', 'Total Contributions', 'External Contributions', 'Internal Contributions', 'Internal Contribution %', 'Total Contributors', 'External Contributors', 'External Contributor %', 'Internal Contributors', 'Internal Contributor %', 'Repo Rank', 'External Repo Contributed To', 'Repo Contributors', 'Repo Contributions', 'External Contribution %', 'External Contributor %'];
 
 module.exports = async function (argv) {
+    const PROJECT_ID = argv.project || 'public-github-adobe';
+    const bigquery = new BigQuery({
+        projectId: PROJECT_ID,
+        keyFilename: argv.googlecloud || 'bigquery.json'
+    });
     const csv = csv_writer({
         path: argv.output,
         header,

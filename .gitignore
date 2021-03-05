@@ -1,5 +1,6 @@
 node_modules
 **/*.swp
 *.csv
-*.json
 *.token
+*.json
+!.eslintrc.json

@@ -19,17 +19,17 @@ moment.relativeTimeThreshold('m', 55);
 moment.relativeTimeThreshold('ss', 5);
 moment.relativeTimeThreshold('s', 55);
 
-const PROJECT_ID = 'public-github-adobe';
-const DATASET_ID = 'github_archive_query_views';
-const bigquery = new BigQuery({
-    projectId: PROJECT_ID,
-    keyFilename: 'bigquery.json'
-});
 const fs = require('fs');
 const csv_reader = require('csv-reader');
 
 // Connects to mysql DB storing user-company associations and streams rows to be written as json
 module.exports = async function (argv) {
+    const PROJECT_ID = argv.project || 'public-github-adobe';
+    const DATASET_ID = argv.dataset || 'github_archive_query_views';
+    const bigquery = new BigQuery({
+        projectId: PROJECT_ID,
+        keyFilename: argv.googlecloud || 'bigquery.json'
+    });
     const TABLE_ID = argv.output;
     const FILE = argv.input;
     let inputStream = fs.createReadStream(FILE, 'utf8');
@@ -77,10 +77,12 @@ module.exports = async function (argv) {
             job.on('error', (e) => { console.error('Job error', e); });
         }
     });
+    let rowCounter = 0;
     inputStream
         .pipe(new csv_reader({ skipHeader: true, parseNumbers: true, parseBooleans: true, trim: true }))
         .on('data', function (row) {
-            console.log('A row arrived: ', row);
+            rowCounter++;
+            console.log(rowCounter, 'row arrived: ', row);
         })
         .on('end', function (data) {
             console.log('No more rows!');
@@ -94,8 +96,8 @@ module.exports = async function (argv) {
             }
             */
             callback(null, {
-                user: record[1],
-                company: record[0]
+                user: String(record[1]),
+                company: String(record[0])
             });
         }))
         .pipe(JSONStream.stringify(false))

@@ -20,14 +20,14 @@ const companies_project_csv = require('../src/companies_project_csv.js');
 const strip_json = require('../src/strip-json.js');
 const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
 
-yargs
-    .command('strip-json', 'Parses and strips GitHub Archive JSON dumps into smaller, customizable payloads.', {
+yargs.
+    command('strip-json', 'Parses and strips GitHub Archive JSON dumps into smaller, customizable payloads.', {
         input: {
             alias: 'i',
             desc: 'Path to GitHub Archive payload JSON file'
         }
-    }, strip_json)
-    .command('companies-project-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos. Bucketed by month, starting from 2018-01. Outputs to a CSV file.', {
+    }, strip_json).
+    command('companies-project-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos. Bucketed by month, starting from 2018-01. Outputs to a CSV file.', {
         contributorFile: {
             alias: 'o',
             default: 'project-activity-contributors.csv',
@@ -42,14 +42,9 @@ yargs
             alias: 'a',
             default: 'project-activity-raw.csv',
             desc: 'Filename to write CSV data of raw project activity.'
-        },
-        googlecloud: {
-            alias: 'g',
-            desc: 'Path to Google Cloud credentials JSON file. For information on how to generate this file, see https://cloud.google.com/docs/authentication/getting-started',
-            default: 'bigquery.json'
         }
-    }, companies_project_csv)
-    .command('company-contributions-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos, differentiating between internal vs. external repository activity. Bucketed by quarter, starting from 2018-Q1. Outputs to a CSV file.', {
+    }, companies_project_csv).
+    command('company-contributions-csv', 'Compile numbers on the amount of GitHub contributions (issues, PRs and code pushed) from a company to public GitHub repos, differentiating between internal vs. external repository activity. Bucketed by quarter, starting from 2018-Q1. Outputs to a CSV file.', {
         output: {
             alias: 'o',
             default: 'contributions.csv',
@@ -64,14 +59,9 @@ yargs
             alias: 'c',
             desc: 'BigQuery-compatible WHERE clause to identify users as part of a company based on their GitHub profile\'s Company field. Include only the portion of the clause _after_ WHERE. Take care! One can easily SQL inject themselves here! Example for identifying Twilio users:\n"(company LIKE \'%twilio%\' OR company LIKE \'%sendgrid%\')"',
             demandOption: 'You must provide a WHERE clause to filter users by their company!'
-        },
-        googlecloud: {
-            alias: 'g',
-            desc: 'Path to Google Cloud credentials JSON file. For information on how to generate this file, see https://cloud.google.com/docs/authentication/getting-started',
-            demandOption: 'You must provide a path to a Google Cloud credentials JSON file!'
         }
-    }, contributions_csv)
-    .command('bigquery-to-dynamo', 'Move data from BigQuery users-companies style tables to AWS DynamoDB', {
+    }, contributions_csv).
+    command('bigquery-to-dynamo', 'Move data from BigQuery users-companies style tables to AWS DynamoDB', {
         source: {
             alias: 's',
             demandOption: 'You must provide a BigQuery table name as a source!',
@@ -91,8 +81,8 @@ yargs
             demandOption: 'You must provide an AWS region string',
             desc: 'AWS region string, i.e. us-east-2'
         }
-    }, bigquery_to_dynamo)
-    .command('rank-corporations <source> [limit]', false/* 'show top [limit] companies based on number of active GitHubbers, parsed from the <source> BigQuery table'*/, {
+    }, bigquery_to_dynamo).
+    command('rank-corporations <source> [limit]', false/* 'show top [limit] companies based on number of active GitHubbers, parsed from the <source> BigQuery table'*/, {
         source: {
             alias: 's',
             demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
@@ -103,15 +93,15 @@ yargs
             desc: 'How many top companies to show?',
             default: null
         }
-    }, rank)
-    .command('db-to-bigquery <output>', 'ADMINS ONLY! Send user-to-company associations to a BigQuery table', {
+    }, rank).
+    command('db-to-bigquery <output>', 'ADMINS ONLY! Send user-to-company associations to a BigQuery table', {
         output: {
             alias: 'o',
             default: 'users_companies',
             desc: 'BigQuery table to send data to'
         }
-    }, db_to_bigquery)
-    .command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
+    }, db_to_bigquery).
+    command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
         source: {
             alias: 's',
             demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
@@ -122,8 +112,8 @@ yargs
             default: false,
             desc: 'Drop the temporary usercompany MySQL table'
         }
-    }, update_db)
-    .command('csv-to-bigquery <input> <output>', 'Send a csv to bigquery', {
+    }, update_db).
+    command('csv-to-bigquery <input> <output>', 'Send a csv to bigquery', {
         output: {
             alias: 'o',
             demandOption: 'You must provide a BigQuery table name to send data to',
@@ -134,8 +124,8 @@ yargs
             demandOption: 'You must provide a CSV file to use as input',
             desc: 'Input .csv file to send to BigQuery'
         }
-    }, csv_to_bigquery)
-    .command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
+    }, csv_to_bigquery).
+    command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
         source: {
             alias: 's',
             demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
@@ -146,34 +136,48 @@ yargs
             default: false,
             desc: 'Drop the temporary usercompany MySQL table'
         }
-    }, update_db)
-    .env('OSS')
-    .option('db-server', {
+    }, update_db).
+    option('googlecloud', {
+        alias: 'g',
+        desc: 'Path to Google Cloud credentials JSON file. For information on how to generate this file, see https://cloud.google.com/docs/authentication/getting-started',
+        default: 'bigquery.json'
+    }).
+    option('project', {
+        alias: 'p',
+        desc: 'Google Cloud Project ID',
+        default: 'public-github-adobe'
+    }).
+    option('dataset', {
+        alias: 's',
+        desc: 'Google Cloud Dataset ID',
+        default: 'github_archive_query_views'
+    }).
+    env('OSS').
+    option('db-server', {
         alias: 'd',
         default: 'leopardprdd',
         desc: 'Database server name'
-    })
-    .option('db-user', {
+    }).
+    option('db-user', {
         alias: 'u',
         default: 'GHUSERCO',
         desc: 'Database username'
-    })
-    .option('db-password', {
+    }).
+    option('db-password', {
         type: 'string'
-    })
-    .option('db-name', {
+    }).
+    option('db-name', {
         alias: 'n',
         default: 'GHUSERCO',
         desc: 'Database name'
-    })
-    .option('table-name', {
+    }).
+    option('table-name', {
         alias: 't',
         default: 'usercompany',
         desc: 'Database table name'
-    })
-    .option('db-port', {
+    }).
+    option('db-port', {
         alias: 'p',
         default: 3323,
         desc: 'Database port'
-    })
-    .argv;
+    }).argv;
