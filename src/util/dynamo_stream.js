@@ -17,14 +17,12 @@ class DynamoStream extends Writable {
 
     async _write (chunk, _, next) {
         this.buffer.push(this.convert_chunk(chunk));
-        this.buffer.push(this.convert_chunk(chunk, true));
         await this.maybe_drain(next);
         return next();
     }
 
     async _writev (records, next) {
         this.buffer = this.buffer.concat(records.map((record) => this.convert_chunk(record.chunk)));
-        this.buffer = this.buffer.concat(records.map((record) => this.convert_chunk(record.chunk, true)));
         await this.maybe_drain(next);
         return next();
     }
@@ -67,7 +65,7 @@ class DynamoStream extends Writable {
         }
     }
 
-    convert_chunk (chunk, current) {
+    convert_chunk (chunk) {
         let item = {
             PutRequest: {
                 Item: {
@@ -78,10 +76,6 @@ class DynamoStream extends Writable {
                 }
             }
         };
-        if (current) {
-            item.PutRequest.Item.startdate = 0;
-            item.PutRequest.Item.current = 1;
-        }
         return item;
     }
 }

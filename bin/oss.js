@@ -68,8 +68,8 @@ yargs.
             desc: 'BigQuery table name housing user-company associations'
         },
         startdate: {
-            demandOption: 'You must provide a startdate in UNIX timestamp epoch (milliseconds)',
-            desc: 'Start date, as a number, will be blased into dynamo'
+            demandOption: 'You must provide a startdate ISO8601 string format!',
+            desc: 'Start date, as a string in ISO8601, will be attached to each record'
         },
         destination: {
             alias: 'd',
