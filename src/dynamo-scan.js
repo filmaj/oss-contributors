@@ -171,7 +171,7 @@ module.exports = async function (argv) {
             }
             process.stdout.write(`\nScanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB)                                                             \r`);
         }
-        if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey;
+        if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey = scanResults.LastEvaluatedKey;
         counter += scanResults.Count;
         console.log(`\nprocessed ${counter} records, asking for new page...`);
         scanResults = await ddb.scan(scanParams).promise();
