@@ -32,6 +32,7 @@ module.exports = async function (argv) {
     let scanParams = { ...p };
     let counter = 0;
     let written = 0;
+    let deleted = 0;
     let scanResults = { Items: [], Count: 0 };
     do {
         for (let record of scanResults.Items) {
@@ -162,12 +163,13 @@ module.exports = async function (argv) {
             if (batchWriteParams.RequestItems[argv.source].length) {
                 try {
                     await ddb.batchWrite(batchWriteParams).promise();
-                    written += batchWriteParams.RequestItems[argv.source].length;
+                    written += batchWriteParams.RequestItems[argv.source].filter(i => i.PutRequest).length;
+                    deleted += batchWriteParams.RequestItems[argv.source].filter(i => i.DeleteRequest).length;
                 } catch (e) {
                     console.error('Error during write!', e);
                 }
             }
-            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} records to DB                                      \r`);
+            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB                                      \r`);
         }
         if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey;
         counter += scanResults.Count;
