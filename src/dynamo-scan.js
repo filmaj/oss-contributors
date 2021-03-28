@@ -35,7 +35,7 @@ module.exports = async function (argv) {
     let deleted = 0;
     let scanResults = { Items: [], Count: 0 };
     do {
-        let peek = scanResults.Items.slice(0, 10);
+        let peek = scanResults.Items.slice(0, 10).map(i => i.username);
         for (let record of scanResults.Items) {
             let username = record.username;
             if (userSet.has(username)) continue;
