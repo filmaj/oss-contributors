@@ -19,8 +19,10 @@ const AWS = require('aws-sdk');
 function clean (str) {
     return str ? str : null;
 }
+let userSet = new Set();
 
 module.exports = async function (argv) {
+    userSet = new Set();
     let ddb = new AWS.DynamoDB.DocumentClient({
         region: argv.region
     });
@@ -28,7 +30,6 @@ module.exports = async function (argv) {
         TableName: argv.source
     };
     let scanParams = { ...p };
-    let userSet = new Set();
     let counter = 0;
     let written = 0;
     let scanResults = { Items: [], Count: 0 };
@@ -42,12 +43,17 @@ module.exports = async function (argv) {
             queryParams.ExpressionAttributeNames = { '#username': 'username' };
             queryParams.ExpressionAttributeValues = { ':username': username };
             let queryResults = await ddb.query(queryParams).promise();
-            let affiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META' && typeof r.match === 'undefined').sort((a, b) => {
+            let oldAffiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META');
+            let modernAffiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META' && typeof r.match === 'undefined');
+            let affiliations = modernAffiliations.sort((a, b) => {
                 // sort in chronological order
                 return b.startdate > a.startdate ? -1 : 1;
             });
             let meta = queryResults.Items.find((r) => r.startdate === '#META'); // this may be undefined
-            let currMatch, currRaw, prevMatch, prevRaw;
+            let currMatch = false;
+            let currRaw = false;
+            let prevMatch = false;
+            let prevRaw = false;
             let newAffiliations = [];
             let deleteAffiliations = [];
             for (let a of affiliations) {
@@ -98,11 +104,23 @@ module.exports = async function (argv) {
                         newAffiliations.push({ username, startdate: a.startdate, match, raw });
                     }
                 } else if (clean(currRaw) === clean(prevRaw)) {
-                    // both match fields and current raw field are empty and we matched to previous raw field which means its also empty! delete it
-                    deleteAffiliations.push({ username, startdate: a.startdate });
-                    continue;
+                    // both match fields and current raw field are empty
+                    // plus currRaw is empty so previous raw field also empty!
+                    // delete it if this isn't the first processing we're doing
+                    if (typeof prevRaw === 'boolean') {
+                        // if were dealing with boolean then this is the first
+                        // record for the user. since fields are empty, then
+                        // this user never had a company associated with them.
+                        // so we add a record with null entries
+                        newAffiliations.push({ username, startdate: a.startdate, match: null, raw: null });
+                    } else {
+                        // we reserve boolean type on these curr/prev variables
+                        // to denote 'not processed yet'
+                        deleteAffiliations.push({ username, startdate: a.startdate });
+                        continue;
+                    }
                 } else {
-                    // change in raw fields, make sure we update/write
+                    // change in raw fields
                     let raw = clean(currRaw);
                     let match = raw;
                     newAffiliations.push({ username, startdate: a.startdate, match, raw });
@@ -111,6 +129,13 @@ module.exports = async function (argv) {
                 prevRaw = currRaw;
             }
             let writeMeta = false;
+            if (oldAffiliations.length === 0 && meta) {
+                meta.updated = '2018-01-01T00:00:00.001Z';
+                meta.match = null;
+                meta.raw = null;
+                writeMeta = true;
+                newAffiliations.push({ username, startdate: meta.updated, match: null, raw: null });
+            }
             if (meta) {
                 delete meta.inferredAffiliation;
                 delete meta.lastUpdated;
@@ -142,10 +167,15 @@ module.exports = async function (argv) {
                     console.error('Error during write!', e);
                 }
             }
+            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} records to DB                                      \r`);
         }
-        process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} records to DB                                      \r`);
         if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey;
         counter += scanResults.Count;
         scanResults = await ddb.scan(scanParams).promise();
     } while (scanResults.Items.length);
 };
+process.on('SIGINT', function () {
+    console.log('Caught interrupt signal');
+    console.log('Processed users', Array.from(userSet));
+    process.exit(1);
+});

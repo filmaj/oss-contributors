@@ -218,4 +218,33 @@ describe('dynamo-scan', () => {
         await dynamoScan(scanParams);
         expect(writeSpy).not.toHaveBeenCalled();
     });
+    it('writes a single null record for four empty consecutive records', async () => {
+        scanResults = {
+            Count: 4,
+            Items: [
+                {username: 'filmaj', startdate: '2021', polishedcompany: null, rawcompany: ''},
+                {username: 'filmaj', startdate: '2020', polishedcompany: null, rawcompany: ''},
+                {username: 'filmaj', startdate: '2019', polishedcompany: null, rawcompany: ''},
+                {username: 'filmaj', startdate: '2018', polishedcompany: null, rawcompany: ''}
+            ]
+        };
+        queryResults = scanResults;
+        await dynamoScan(scanParams);
+        const writes = writeSpy.calls.mostRecent().args[0].RequestItems[scanParams.source].filter(w => w.PutRequest).map(w => w.PutRequest.Item);
+        expect(writes).toContain(jasmine.objectContaining({username: 'filmaj', startdate: '2018', raw: null, match: null}));
+        expect(writes).not.toContain(jasmine.objectContaining({username: 'filmaj', startdate: '2021'}));
+        expect(writes).not.toContain(jasmine.objectContaining({username: 'filmaj', startdate: '2020'}));
+        expect(writes).not.toContain(jasmine.objectContaining({username: 'filmaj', startdate: '2019'}));
+    });
+    it('writes a single null record for 2018 if nothing but a #META record exists', async () => {
+        scanResults = {
+            Count: 1,
+            Items: [{username: 'filmaj', startdate: '#META'}]
+        };
+        queryResults = scanResults;
+        await dynamoScan(scanParams);
+        const writes = writeSpy.calls.mostRecent().args[0].RequestItems[scanParams.source].filter(w => w.PutRequest).map(w => w.PutRequest.Item);
+        expect(writes).toContain(jasmine.objectContaining({username: 'filmaj', startdate: '2018-01-01T00:00:00.001Z', raw: null, match: null}));
+        expect(writes).toContain(jasmine.objectContaining({username: 'filmaj', startdate: '#META', updated: '2018-01-01T00:00:00.001Z', raw: null, match: null}));
+    });
 });
