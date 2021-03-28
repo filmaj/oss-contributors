@@ -19,6 +19,7 @@ const contributions_csv = require('../src/contributions_csv.js');
 const companies_project_csv = require('../src/companies_project_csv.js');
 const strip_json = require('../src/strip-json.js');
 const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
+const dynamo_scan = require('../src/dynamo-scan.js');
 
 yargs.
     command('strip-json', 'Parses and strips GitHub Archive JSON dumps into smaller, customizable payloads.', {
@@ -82,6 +83,18 @@ yargs.
             desc: 'AWS region string, i.e. us-east-2'
         }
     }, bigquery_to_dynamo).
+    command('dynamo-scan', 'Scan, process and update a DynamoDB table.', {
+        source: {
+            alias: 's',
+            demandOption: 'You must provide a Dynamo table name as a source',
+            'desc': 'DynamoDB table name for source data'
+        },
+        region: {
+            alias: 'r',
+            demandOption: 'You must provide an AWS region string',
+            desc: 'AWS region string, i.e. us-east-2'
+        }
+    }, dynamo_scan).
     command('rank-corporations <source> [limit]', false/* 'show top [limit] companies based on number of active GitHubbers, parsed from the <source> BigQuery table'*/, {
         source: {
             alias: 's',

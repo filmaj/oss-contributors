@@ -8,7 +8,8 @@
   "author": "filmaj",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "eslint --fix"
+    "test": "eslint --fix",
+    "test:unit": "jasmine --config=test/jasmine.json"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^5.0.0",
@@ -29,6 +30,8 @@
     "yargs": "^16.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.21.0"
+    "aws-sdk-mock": "^5.1.0",
+    "eslint": "^7.21.0",
+    "jasmine": "^3.7.0"
   }
 }
