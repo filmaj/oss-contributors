@@ -35,6 +35,7 @@ module.exports = async function (argv) {
     let deleted = 0;
     let scanResults = { Items: [], Count: 0 };
     do {
+        let peek = scanResults.Items.slice(0, 10);
         for (let record of scanResults.Items) {
             let username = record.username;
             if (userSet.has(username)) continue;
@@ -169,15 +170,10 @@ module.exports = async function (argv) {
                     console.error('Error during write!', e);
                 }
             }
-            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB                                      \r`);
+            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB (current scan user peek: ${peek})                                                             \r`);
         }
         if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey;
         counter += scanResults.Count;
         scanResults = await ddb.scan(scanParams).promise();
     } while (scanResults.Items.length);
 };
-process.on('SIGINT', function () {
-    console.log('Caught interrupt signal');
-    console.log('Processed users', Array.from(userSet));
-    process.exit(1);
-});
