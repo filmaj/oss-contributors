@@ -35,7 +35,6 @@ module.exports = async function (argv) {
     let deleted = 0;
     let scanResults = { Items: [], Count: 0 };
     do {
-        let peek = scanResults.Items.slice(0, 10).map(i => i.username);
         for (let record of scanResults.Items) {
             let username = record.username;
             if (userSet.has(username)) continue;
@@ -170,10 +169,12 @@ module.exports = async function (argv) {
                     console.error('Error during write!', e);
                 }
             }
-            process.stdout.write(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB (current scan user peek: ${peek})                                                             \r`);
+            process.stdout.write(`\nScanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB)                                                             \r`);
         }
         if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey;
         counter += scanResults.Count;
+        console.log(`\nprocessed ${counter} records, asking for new page...`);
         scanResults = await ddb.scan(scanParams).promise();
-    } while (scanResults.Items.length);
+        console.log('retrieved page. iterating.\n');
+    } while (scanResults.Count);
 };
