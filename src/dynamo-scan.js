@@ -38,9 +38,9 @@ module.exports = async function (argv) {
     let scanResults = { Items: [], Count: 0 };
     if (fs.existsSync('start.key')) {
         console.log('Reading start key on startup...');
-        let startkey = fs.readFile('start.key').toString();
+        let startkey = JSON.parse(fs.readFile('start.key').toString());
         scanResults.LastEvaluatedKey = startkey;
-        console.log(`Set start key to ${startkey}`);
+        console.log(`Set start key to ${JSON.stringify(startkey)}`);
     }
     do {
         console.log(`Outer loop begins, iterating on Items (${scanResults.Items.length})...`);
@@ -187,12 +187,12 @@ module.exports = async function (argv) {
         console.log(`Scanned ${counter} records, skipped ${skipped}, processed ${userSet.size} users and ${affCounter} affiliations, written ${written} and deleted ${deleted} records to DB)`);
         if (scanResults.LastEvaluatedKey) {
             scanParams.ExclusiveStartKey = scanResults.LastEvaluatedKey;
-            console.log(`Writing start key ${scanResults.LastEvaluatedKey}`);
-            fs.writeFileSync('start.key', scanResults.LastEvaluatedKey);
+            console.log(`Writing start key ${JSON.stringify(scanResults.LastEvaluatedKey)}`);
+            fs.writeFileSync('start.key', JSON.stringify(scanResults.LastEvaluatedKey));
             console.log('... written.');
         }
         counter += scanResults.Count;
-        console.log(`Retrieving page of scan results (key: ${scanParams.ExclusiveStartKey})...`);
+        console.log(`Retrieving page of scan results (key: ${JSON.stringify(scanParams.ExclusiveStartKey)})...`);
         scanResults = await ddb.scan(scanParams).promise();
         console.log(`... retrieved page of ${scanResults.Count} results, loop continues...`);
     } while (scanResults.Count);
