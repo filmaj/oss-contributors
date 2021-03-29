@@ -9,7 +9,7 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-
+const fs = require('fs');
 const moment = require('moment');
 moment.relativeTimeThreshold('m', 55);
 moment.relativeTimeThreshold('ss', 5);
@@ -34,7 +34,14 @@ module.exports = async function (argv) {
     let written = 0;
     let deleted = 0;
     let scanResults = { Items: [], Count: 0 };
+    if (fs.existsSync('start.key')) {
+        console.log('Reading start key on startup...');
+        let startkey = fs.readFile('start.key').toString();
+        scanResults.LastEvaluatedKey = startkey;
+        console.log(`Set start key to ${startkey}`);
+    }
     do {
+        console.log(`Outer loop begins, iterating on Items (${scanResults.Items.length})...`);
         for (let record of scanResults.Items) {
             let username = record.username;
             if (userSet.has(username)) continue;
@@ -169,12 +176,17 @@ module.exports = async function (argv) {
                     console.error('Error during write!', e);
                 }
             }
-            process.stdout.write(`\nScanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB)                                                             \r`);
         }
-        if (scanResults.LastEvaluatedKey) scanParams.ExclusiveStartKey = scanResults.LastEvaluatedKey;
+        console.log(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB)`);
+        if (scanResults.LastEvaluatedKey) {
+            scanParams.ExclusiveStartKey = scanResults.LastEvaluatedKey;
+            console.log(`Writing start key ${scanResults.LastEvaluatedKey}`);
+            fs.writeFileSync('start.key', scanResults.LastEvalutedKey);
+            console.log('... written.');
+        }
         counter += scanResults.Count;
-        console.log(`\nprocessed ${counter} records, asking for new page...`);
+        console.log(`Retrieving page of scan results (key: ${scanParams.ExclusiveStartKey})...`);
         scanResults = await ddb.scan(scanParams).promise();
-        console.log('retrieved page. iterating.\n');
+        console.log(`... retrieved page of ${scanResults.Count} results, loop continues...`);
     } while (scanResults.Count);
 };
