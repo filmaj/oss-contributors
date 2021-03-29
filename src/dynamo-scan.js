@@ -51,6 +51,12 @@ module.exports = async function (argv) {
                 continue;
             }
             userSet.add(username);
+            if (typeof record.match !== 'undefined') {
+                // if this record already has properties in the post-migration
+                // form, we can skip it completely
+                skipped++;
+                continue;
+            }
             let queryParams = { ...p };
             queryParams.KeyConditionExpression = '#username = :username';
             queryParams.ExpressionAttributeNames = { '#username': 'username' };
