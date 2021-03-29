@@ -38,7 +38,7 @@ module.exports = async function (argv) {
     let scanResults = { Items: [], Count: 0 };
     if (fs.existsSync('start.key')) {
         console.log('Reading start key on startup...');
-        let startkey = JSON.parse(fs.readFile('start.key').toString());
+        let startkey = JSON.parse(fs.readFileSync('start.key').toString());
         scanResults.LastEvaluatedKey = startkey;
         console.log(`Set start key to ${JSON.stringify(startkey)}`);
     }
