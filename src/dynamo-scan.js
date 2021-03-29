@@ -43,7 +43,7 @@ module.exports = async function (argv) {
         console.log(`Set start key to ${JSON.stringify(startkey)}`);
     }
     do {
-        console.log(`Outer loop begins, iterating on Items (${scanResults.Items.length})...`);
+        console.log(`(${new Date().toISOString()}) Outer loop begins, iterating on Items (${scanResults.Items.length})...`);
         for (let record of scanResults.Items) {
             let username = record.username;
             if (userSet.has(username)) {
