@@ -33,6 +33,8 @@ module.exports = async function (argv) {
     let counter = 0;
     let written = 0;
     let deleted = 0;
+    let skipped = 0;
+    let affCounter = 0;
     let scanResults = { Items: [], Count: 0 };
     if (fs.existsSync('start.key')) {
         console.log('Reading start key on startup...');
@@ -44,14 +46,17 @@ module.exports = async function (argv) {
         console.log(`Outer loop begins, iterating on Items (${scanResults.Items.length})...`);
         for (let record of scanResults.Items) {
             let username = record.username;
-            if (userSet.has(username)) continue;
+            if (userSet.has(username)) {
+                skipped++;
+                continue;
+            }
             userSet.add(username);
             let queryParams = { ...p };
             queryParams.KeyConditionExpression = '#username = :username';
             queryParams.ExpressionAttributeNames = { '#username': 'username' };
             queryParams.ExpressionAttributeValues = { ':username': username };
             let queryResults = await ddb.query(queryParams).promise();
-            let oldAffiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META');
+            let allAffiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META');
             let modernAffiliations = queryResults.Items.filter((r) => r && r.startdate && r.startdate !== '#META' && typeof r.match === 'undefined');
             let affiliations = modernAffiliations.sort((a, b) => {
                 // sort in chronological order
@@ -65,6 +70,7 @@ module.exports = async function (argv) {
             let newAffiliations = [];
             let deleteAffiliations = [];
             for (let a of affiliations) {
+                affCounter++;
                 currMatch = a.polishedcompany;
                 currRaw = a.rawcompany;
                 if (clean(currMatch)) {
@@ -137,7 +143,8 @@ module.exports = async function (argv) {
                 prevRaw = currRaw;
             }
             let writeMeta = false;
-            if (oldAffiliations.length === 0 && meta) {
+            if (allAffiliations.length === 0 && meta) {
+                // the only record for the user that exists is the meta record
                 meta.updated = '2018-01-01T00:00:00.001Z';
                 meta.match = null;
                 meta.raw = null;
@@ -177,11 +184,11 @@ module.exports = async function (argv) {
                 }
             }
         }
-        console.log(`Scanned ${counter} records, processed ${userSet.size} users, written ${written} and deleted ${deleted} records to DB)`);
+        console.log(`Scanned ${counter} records, skipped ${skipped}, processed ${userSet.size} users and ${affCounter} affiliations, written ${written} and deleted ${deleted} records to DB)`);
         if (scanResults.LastEvaluatedKey) {
             scanParams.ExclusiveStartKey = scanResults.LastEvaluatedKey;
             console.log(`Writing start key ${scanResults.LastEvaluatedKey}`);
-            fs.writeFileSync('start.key', scanResults.LastEvalutedKey);
+            fs.writeFileSync('start.key', scanResults.LastEvaluatedKey);
             console.log('... written.');
         }
         counter += scanResults.Count;
