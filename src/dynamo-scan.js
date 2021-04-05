@@ -132,6 +132,9 @@ module.exports = async function (argv) {
         results = await ddb[op](params).promise();
         console.log(`... retrieved page of ${results.Count} results, loop continues...`);
     } while (results.Count);
+    console.log('No more outer scan results! Flushing and then we say goodbye...', JSON.stringify(batchWriteParams, null, 2));
+    await module.exports.flush();
+    console.log('Goodbye!');
 };
 // mostly for testing
 module.exports.flush = async function () {
