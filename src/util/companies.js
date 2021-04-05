@@ -74,6 +74,7 @@ module.exports = {
     jetbrains: 'JetBrains',
     intel: 'Intel',
     inria: 'INRIA',
+    indeed: 'Indeed',
     ibm: 'IBM',
     huawei: 'Huawei',
     guardian: 'The Guardian',
@@ -119,7 +120,7 @@ module.exports = {
   is_empty: (co) => {
     if (!co || co.length === 0) return true;
     let n = co.toLowerCase();
-    return n === 'null' || n === 'na' || n === 'n/a' || n === 'none' || n === '-' || n === 'no' || n === '.' || n === 'freelance' || n === 'freelancer';
+    return n === 'null' || n === 'na' || n === 'n/a' || n === 'none' || n === '-' || n === 'no' || n === '.' || n === 'freelance' || n === 'freelancer' || n === 'nil';
   },
   is_corporation: (co) => {
     let n = co.toLowerCase();
@@ -142,5 +143,22 @@ module.exports = {
     'Cisco Systems': /francisco/i,
     'Amazon': /[a-z\-]aws|aws[a-z\-]|amazonas/i
   },
-  catch_all: /opendistro-for-elasticsearch|microsoft|google|amazon|amzn|aws|red hat|redhat|ibm|pivotal|intel|facebook|alibaba|uber|wix|github|tencent|baidu|apple||mozilla|oracle|shopify|mongodb|vmware|netflix|salesforce|linkedin|palantir|yahoo|mapbox|unity|automattic|travis|spotify|zalando|esri|sap|epam|telerik|stripe|kitware|suse|odoo|yandex|adobe|airbnb|guardian|docker|nuxeo|nvidia|elastic|yelp|wso2|inria|puppet|datadog|jetbrains|canonical|rackspace|thoughtworks|andela|liferay|epfl|cnrs|embl|european bioinformatics|accenture|cisco|ericsson|capital one|huawei|booking\.com|netease|bbc|nokia|zendesk|paypal|eth z|samsung|slack|twitter|lyft|snapchat|zeit|atlassian|square|wechat|wikimedia|observable|magento|behance|aviary|fotolia|twilio|workday|grafana|gitlab|oculus/gi
+  catch_all: /opendistro-for-elasticsearch|microsoft|google|amazon|amzn|aws|red hat|redhat|ibm|pivotal|intel|facebook|alibaba|uber|wix|github|tencent|baidu|apple||mozilla|oracle|shopify|mongodb|vmware|netflix|salesforce|linkedin|palantir|yahoo|mapbox|unity|automattic|travis|spotify|zalando|esri|sap|epam|telerik|stripe|kitware|suse|odoo|yandex|adobe|airbnb|guardian|docker|nuxeo|nvidia|elastic|yelp|wso2|inria|puppet|datadog|jetbrains|canonical|rackspace|thoughtworks|andela|liferay|epfl|cnrs|embl|european bioinformatics|accenture|cisco|ericsson|capital one|huawei|booking\.com|netease|bbc|nokia|zendesk|paypal|eth z|samsung|slack|twitter|lyft|snapchat|zeit|atlassian|square|wechat|wikimedia|observable|magento|behance|aviary|fotolia|twilio|workday|grafana|gitlab|oculus|indeed/gi,
+  match: function (str) {
+    let m = null;
+    if (!module.exports.is_empty(str)) {
+      let regexMatch = str.match(module.exports.catch_all);
+      if (regexMatch) {
+        let label = module.exports.map[regexMatch[0].toLowerCase()];
+        if (module.exports.ignore[label]) {
+          if (!str.match(module.exports.ignore[label])) {
+            m = label;
+          }
+        } else {
+          m = label;
+        }
+      }
+    }
+    return m;
+  }
 };

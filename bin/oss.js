@@ -83,7 +83,7 @@ yargs.
             desc: 'AWS region string, i.e. us-east-2'
         }
     }, bigquery_to_dynamo).
-    command('dynamo-scan', 'Scan, process and update a DynamoDB table.', {
+    command('dynamo-scan', 'Scan, process and update a DynamoDB table and index.', {
         source: {
             alias: 's',
             demandOption: 'You must provide a Dynamo table name as a source',
@@ -93,6 +93,10 @@ yargs.
             alias: 'r',
             demandOption: 'You must provide an AWS region string',
             desc: 'AWS region string, i.e. us-east-2'
+        },
+        index: {
+            alias: 'i',
+            desc: 'DynamoDB Index name to query'
         }
     }, dynamo_scan).
     command('rank-corporations <source> [limit]', false/* 'show top [limit] companies based on number of active GitHubbers, parsed from the <source> BigQuery table'*/, {
@@ -138,18 +142,6 @@ yargs.
             desc: 'Input .csv file to send to BigQuery'
         }
     }, csv_to_bigquery).
-    command('update-db <source>', 'ADMINS ONLY! Update user-to-company database based on a BigQuery source table', {
-        source: {
-            alias: 's',
-            demandOption: 'You must provide a BigQuery table name as a GitHub.com activity source!',
-            desc: 'BigQuery table name housing GitHub.com activity data'
-        },
-        drop: {
-            alias: 'D',
-            default: false,
-            desc: 'Drop the temporary usercompany MySQL table'
-        }
-    }, update_db).
     option('googlecloud', {
         alias: 'g',
         desc: 'Path to Google Cloud credentials JSON file. For information on how to generate this file, see https://cloud.google.com/docs/authentication/getting-started',
