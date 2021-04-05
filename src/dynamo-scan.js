@@ -70,7 +70,7 @@ module.exports = async function (argv) {
     do {
         console.log(`(${new Date().toISOString()}) Outer loop begins, iterating on Items (${results.Items.length})...`);
         for (let record of results.Items) {
-            process.stdout.write(`Scanned ${counter} records, skipped ${skipped}, processed ${userSet.size} users and ${affCounter} affiliations, written ${written} records to DB)                 \r`);
+            process.stdout.write(`Scanned ${counter} records, skipped ${skipped}, processed ${userSet.size} users and ${affCounter} affiliations, written ${written} and deleted ${deleted} records in DB)                 \r`);
             let username = record.username;
             if (userSet.has(username)) {
                 skipped++;
