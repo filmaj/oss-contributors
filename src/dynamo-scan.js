@@ -99,10 +99,15 @@ module.exports = async function (argv) {
                     // update incorrect affiliation record
                     a.match = companies.match(a.raw);
                     currMatch = a.match;
-                    await write({ PutRequest: { Item: a }});
-                }
-                // console.log('post-write current', currMatch, currRaw);
-                if (currMatch === prevMatch && currRaw === prevRaw) {
+                    // console.log('post-write current', currMatch, currRaw);
+                    if (currMatch === prevMatch && currRaw === prevRaw) {
+                        await write({ DeleteRequest: { Key: { username: a.username, startdate: a.startdate } }});
+                    } else {
+                        await write({ PutRequest: { Item: a }});
+                        prevRaw = currRaw;
+                        prevMatch = currMatch;
+                    }
+                } else if (currMatch === prevMatch && currRaw === prevRaw) {
                     // delete this record as it had a false match and now end up
                     // being consecutive identical records
                     await write({ DeleteRequest: { Key: { username: a.username, startdate: a.startdate } }});
@@ -135,7 +140,7 @@ module.exports = async function (argv) {
     } while (results.Count);
     console.log('No more outer scan results! Flushing and then we say goodbye...', JSON.stringify(batchWriteParams, null, 2));
     await module.exports.flush();
-    fs.unlinkSync('start.key');
+    if (fs.existsSync('start.key')) fs.unlinkSync('start.key');
     console.log('Goodbye!');
 };
 // mostly for testing

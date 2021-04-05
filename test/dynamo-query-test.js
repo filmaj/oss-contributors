@@ -26,6 +26,37 @@ describe('dynamo-queries', () => {
         AWS.mock('DynamoDB.DocumentClient', 'batchWrite', writeSpy.and.callFake((params, cb) => cb(null)));
     });
     describe('write ops', () => {
+        it('three affiliation records, two most recent are duplicates and equal raw/match, meta matches too, one should update and one should delete plus meta should update', async () => {
+            scanResults = {
+                Count: 1,
+                Items: [{username: 'filmaj', startdate: '#META', match: 'Sauce Labs', raw: 'Sauce Labs'}]
+            };
+            queryResults = JSON.parse(JSON.stringify(scanResults));
+            queryResults.Items.push({username: 'filmaj', startdate: '2007', match: null, raw: null});
+            queryResults.Items.push({username: 'filmaj', startdate: '2013', match: 'Sauce Labs', raw: 'Sauce Labs'});
+            queryResults.Items.push({username: 'filmaj', startdate: '2014', match: 'Sauce Labs', raw: 'Sauce Labs'});
+            queryResults.Count = 3;
+            await dynamoScan(scanParams);
+            await dynamoScan.flush();
+            const writes = writeSpy.calls.mostRecent().args[0].RequestItems.sometable;
+            const deletes = writes.filter(r => r.DeleteRequest);
+            const puts = writes.filter(r => r.PutRequest);
+            expect(puts.length).toEqual(2);
+            expect(deletes.length).toEqual(1);
+            const affPut = puts[0].PutRequest.Item;
+            const metaPut = puts[1].PutRequest.Item;
+            const del = deletes[0].DeleteRequest.Key;
+            expect(affPut.username).toEqual('filmaj');
+            expect(affPut.startdate).toEqual('2013');
+            expect(affPut.match).toBeNull();
+            expect(affPut.raw).toEqual('Sauce Labs');
+            expect(metaPut.username).toEqual('filmaj');
+            expect(metaPut.startdate).toEqual('#META');
+            expect(metaPut.match).toBeNull();
+            expect(metaPut.raw).toEqual('Sauce Labs');
+            expect(del.username).toEqual('filmaj');
+            expect(del.startdate).toEqual('2014');
+        });
         it('one affiliation record, meta has false positive match, both should update', async () => {
             scanResults = {
                 Count: 1,
