@@ -44,6 +44,7 @@ module.exports = async function (argv) {
                 deleted += params.RequestItems[argv.source].filter(r => r.DeleteRequest).length;
             } catch (e) {
                 console.error('Error during write, will abort!', e);
+                console.error('Params were:', JSON.stringify(params, null, 2));
                 process.exit(1337);
             }
         }
