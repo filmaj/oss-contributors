@@ -134,6 +134,7 @@ module.exports = async function (argv) {
     } while (results.Count);
     console.log('No more outer scan results! Flushing and then we say goodbye...', JSON.stringify(batchWriteParams, null, 2));
     await module.exports.flush();
+    fs.unlinkSync('start.key');
     console.log('Goodbye!');
 };
 // mostly for testing
