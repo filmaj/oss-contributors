@@ -19,6 +19,7 @@ const contributions_csv = require('../src/contributions_csv.js');
 const companies_project_csv = require('../src/companies_project_csv.js');
 const strip_json = require('../src/strip-json.js');
 const bigquery_to_dynamo = require('../src/bigquery-to-dynamo.js');
+const dynamo_to_bigquery = require('../src/dynamo-to-bigquery.js');
 const dynamo_scan = require('../src/dynamo-scan.js');
 
 yargs.
@@ -83,6 +84,23 @@ yargs.
             desc: 'AWS region string, i.e. us-east-2'
         }
     }, bigquery_to_dynamo).
+    command('dynamo-to-bigquery', 'Move data from AWS DynamoDB index to a Google BigQuery table', {
+        source: {
+            alias: 's',
+            demandOption: 'You must provide a DynamoDB table name as a source!',
+            desc: 'DynamoDB table name of data to transfer'
+        },
+        destination: {
+            alias: 'd',
+            demandOption: 'You must provide a BigQuery table name as a destination ',
+            'desc': 'BigQuery table name for destination of data'
+        },
+        region: {
+            alias: 'r',
+            demandOption: 'You must provide an AWS region string',
+            desc: 'AWS region string, i.e. us-east-2'
+        }
+    }, dynamo_to_bigquery).
     command('dynamo-scan', 'Scan, process and update a DynamoDB table and index.', {
         source: {
             alias: 's',

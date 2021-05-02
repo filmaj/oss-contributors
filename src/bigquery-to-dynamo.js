@@ -10,9 +10,9 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const {BigQuery} = require('@google-cloud/bigquery');
+const { BigQuery } = require('@google-cloud/bigquery');
 const moment = require('moment');
-const DynamoStream = require('./util/dynamo_stream');
+const { DynamoWritableStream } = require('./util/dynamo_stream');
 const util = require('util');
 const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
@@ -45,7 +45,7 @@ module.exports = async function (argv) {
         process.exit(1337);
     }
     let input = table.createQueryStream(`SELECT * FROM ${TABLE_ID}`);
-    await pipeline(input, new DynamoStream({
+    await pipeline(input, new DynamoWritableStream({
         table: arctable,
         startdate,
         region
