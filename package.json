@@ -1,6 +1,6 @@
 {
   "name": "oss-contributors",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "bigquery-based github contributor ranking program",
   "repository": "https://github.com/filmaj/oss-contributors",
   "main": "index.js",
